@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Stream Control Center</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="ytb-stream/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header with Logo and Status -->
+        <header class="app-header">
+            <div class="logo-container">
+                <i class="fas fa-broadcast-tower"></i>
+                <h1>Live Stream Control Center</h1>
+            </div>
+            <div class="connection-status">
+                <span id="connection-indicator" class="status-dot"></span>
+                <span id="server-status-text">Connecting...</span>
+            </div>
+        </header>
+
+        <!-- Main Dashboard -->
+        <main class="dashboard">
+            <!-- Status Overview Card -->
+            <section class="card status-overview">
+                <h2><i class="fas fa-heartbeat"></i> System Status</h2>
+                <div class="status-grid">
+                    <div class="status-item">
+                        <div class="status-label">Server Uptime</div>
+                        <div id="uptime" class="status-value">--:--:--</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-label">Active Streams</div>
+                        <div id="active-streams-count" class="status-value">0</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-label">CPU Load</div>
+                        <div class="status-value">
+                            <div id="cpu-load-bar" class="progress-bar">
+                                <div class="progress-fill"></div>
+                            </div>
+                            <span id="cpu-load-value">0%</span>
+                        </div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-label">Memory Usage</div>
+                        <div class="status-value">
+                            <div id="memory-bar" class="progress-bar">
+                                <div class="progress-fill"></div>
+                            </div>
+                            <span id="memory-value">0%</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Stream Control Card -->
+            <section class="card stream-control">
+                <h2><i class="fas fa-sliders-h"></i> Stream Controls</h2>
+                <div class="control-panel">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="stream-profile"><i class="fas fa-list"></i> Stream Profile</label>
+                            <select id="stream-profile" class="modern-select">
+                                <option value="">Select a profile...</option>
+                            </select>
+                        </div>
+                        <button id="refresh-profiles" class="icon-btn" title="Refresh Profiles">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="stream-key"><i class="fas fa-key"></i> YouTube Stream Key</label>
+                        <div class="input-with-action">
+                            <input type="password" id="stream-key" placeholder="Enter stream key">
+                            <button id="toggle-key-visibility" class="icon-btn">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="video-file"><i class="fas fa-video"></i> Media Source</label>
+                        <div class="file-selector">
+                            <select id="video-file" class="modern-select">
+                                <option value="">Select a video file...</option>
+                            </select>
+                            <button id="browse-files" class="icon-btn">
+                                <i class="fas fa-folder-open"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button id="start-btn" class="btn-primary">
+                            <i class="fas fa-play"></i> Start Stream
+                        </button>
+                        <button id="stop-btn" class="btn-danger" disabled>
+                            <i class="fas fa-stop"></i> Stop Stream
+                        </button>
+                        <button id="emergency-stop" class="btn-warning" title="Force stop all streams">
+                            <i class="fas fa-power-off"></i> Emergency Stop
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Stream Profiles Card -->
+            <section class="card stream-profiles">
+                <h2><i class="fas fa-cog"></i> Stream Profiles</h2>
+                <div class="profile-actions">
+                    <button id="add-profile-btn" class="btn-secondary">
+                        <i class="fas fa-plus"></i> Add New Profile
+                    </button>
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="profile-search" placeholder="Search profiles...">
+                    </div>
+                </div>
+                
+                <div class="profile-table-container">
+                    <table class="profile-table">
+                        <thead>
+                            <tr>
+                                <th>Profile Name</th>
+                                <th>Stream Key</th>
+                                <th>Media Source</th>
+                                <th>Last Used</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="profiles-table">
+                            <!-- Will be populated by JavaScript -->
+                            <tr class="empty-row">
+                                <td colspan="5">No profiles found. Create your first profile.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Logs and Monitoring Card -->
+            <section class="card logs-monitoring">
+                <h2><i class="fas fa-terminal"></i> Live Monitoring</h2>
+                <div class="log-tabs">
+                    <button class="tab-btn active" data-tab="stream-logs">Stream Logs</button>
+                    <button class="tab-btn" data-tab="system-logs">System Metrics</button>
+                    <button class="tab-btn" data-tab="ffmpeg-logs">FFmpeg Output</button>
+                </div>
+                
+                <div class="tab-content active" id="stream-logs">
+                    <div class="log-output" id="log-output">
+                        <div class="log-entry info">
+                            <span class="log-time">[12:34:56]</span>
+                            <span class="log-message">System initialized. Ready to stream.</span>
+                        </div>
+                    </div>
+                    <div class="log-actions">
+                        <button id="clear-logs" class="btn-small">
+                            <i class="fas fa-trash"></i> Clear Logs
+                        </button>
+                        <button id="export-logs" class="btn-small">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="system-logs">
+                    <div class="metrics-container">
+                        <div class="metric-chart" id="cpu-chart">
+                            <h3>CPU Usage</h3>
+                            <canvas id="cpu-usage-graph"></canvas>
+                        </div>
+                        <div class="metric-chart" id="memory-chart">
+                            <h3>Memory Usage</h3>
+                            <canvas id="memory-usage-graph"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Profile Modal (Hidden by default) -->
+        <div id="profile-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h2><i class="fas fa-plus-circle"></i> Create New Stream Profile</h2>
+                <form id="profile-form">
+                    <div class="form-group">
+                        <label for="modal-profile-name">Profile Name</label>
+                        <input type="text" id="modal-profile-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="modal-stream-key">Stream Key</label>
+                        <input type="password" id="modal-stream-key" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="modal-video-path">Video Source</label>
+                        <select id="modal-video-path" required>
+                            <option value="">Select a video file...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="modal-bitrate">Bitrate (kbps)</label>
+                        <input type="range" id="modal-bitrate" min="1000" max="10000" value="4500">
+                        <span id="bitrate-value">4500</span>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">Save Profile</button>
+                        <button type="button" class="btn-secondary" id="cancel-profile">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Files -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="ytb-stream/script.js"></script>
+</body>
+</html>
