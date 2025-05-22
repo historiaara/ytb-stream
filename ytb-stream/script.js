@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
   // DOM Elements
-  const apiBaseUrl = window.location.origin;
+  const apiBaseUrl =  window.location.origin + '/ytb-stream';
   const serverStatusText = document.getElementById('server-status-text');
   const connectionIndicator = document.getElementById('connection-indicator');
   const uptimeElement = document.getElementById('uptime');
