@@ -344,9 +344,10 @@ body {
 
 .chart-container {
   position: relative;
-  height: 300px; /* Fixed height for charts */
+  height: 250px; /* Fixed height */
   width: 100%;
 }
+
 
 .tab-content.active {
   display: block;
@@ -514,9 +515,8 @@ body {
   
   /* Ensure canvas elements are contained */
   canvas {
-    display: block;
-    width: 100% !important;
-    height: 100% !important;
+     max-width: 100%;
+     max-height: 100%;
   }
   .action-buttons {
     flex-direction: column;
