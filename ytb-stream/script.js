@@ -32,9 +32,21 @@ document.addEventListener('DOMContentLoaded', function() {
   const modalBitrate = document.getElementById('modal-bitrate');
   const bitrateValue = document.getElementById('bitrate-value');
   const cancelProfileBtn = document.getElementById('cancel-profile');
-  const tabBtns = document.querySelectorAll('.tab-btn');
-  const tabContents = document.querySelectorAll('.tab-content');
+  const tabBtns = document.querySelectorAll('.tab-btn') || [];
+  const tabContents = document.querySelectorAll('.tab-content') || [];
 
+  console.log('Tab buttons found:', tabBtns.length);
+  console.log('Tab contents found:', tabContents.length);
+  
+  tabBtns.forEach(btn => {
+      console.log('Button:', btn, 'Data-tab:', btn.getAttribute('data-tab'));
+  });
+  
+  tabContents.forEach(content => {
+      console.log('Content:', content, 'ID:', content.id);
+  });
+
+  
   // Charts
   const cpuCtx = document.getElementById('cpu-usage-graph').getContext('2d');
   const memoryCtx = document.getElementById('memory-usage-graph').getContext('2d');
@@ -462,11 +474,26 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function switchTab(tabId) {
-    tabBtns.forEach(btn => btn.classList.remove('active'));
-    tabContents.forEach(content => content.classList.remove('active'));
-    
-    document.querySelector(`.tab-btn[data-tab="${tabId}"]`).classList.add('active');
-    document.getElementById(tabId).classList.add('active');
+      // Safely handle tab buttons
+      if (tabBtns && tabBtns.length > 0) {
+          tabBtns.forEach(btn => {
+              if (btn) btn.classList.remove('active');
+          });
+      }
+  
+      // Safely handle tab contents
+      if (tabContents && tabContents.length > 0) {
+          tabContents.forEach(content => {
+              if (content) content.classList.remove('active');
+          });
+      }
+  
+      // Activate the selected tab
+      const selectedBtn = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
+      const selectedContent = document.getElementById(tabId);
+      
+      if (selectedBtn) selectedBtn.classList.add('active');
+      if (selectedContent) selectedContent.classList.add('active');
   }
 
   function formatUptime(seconds) {
