@@ -88,69 +88,82 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Functions
   function initCharts() {
-    cpuChart = new Chart(cpuCtx, {
-      type: 'line',
-      data: {
-        labels: Array(12).fill(''),
-        datasets: [{
-          label: 'CPU Usage %',
-          data: Array(12).fill(0),
-          borderColor: '#4361ee',
-          backgroundColor: 'rgba(67, 97, 238, 0.1)',
-          borderWidth: 2,
-          tension: 0.4,
-          fill: true
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: {
-            beginAtZero: true,
-            max: 100
-          }
+    // Only initialize if charts don't exist
+    if (!cpuChart) {
+      const cpuCtx = document.getElementById('cpu-usage-graph').getContext('2d');
+      cpuChart = new Chart(cpuCtx, {
+        type: 'line',
+        data: {
+          labels: Array(12).fill(''),
+          datasets: [{
+            label: 'CPU Usage %',
+            data: Array(12).fill(0),
+            borderColor: '#4361ee',
+            backgroundColor: 'rgba(67, 97, 238, 0.1)',
+            borderWidth: 2,
+            tension: 0.4,
+            fill: true
+          }]
         },
-        plugins: {
-          legend: {
-            display: false
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100
+            }
+          },
+          plugins: {
+            legend: {
+              display: false
+            }
           }
         }
-      }
-    });
-
-    memoryChart = new Chart(memoryCtx, {
-      type: 'line',
-      data: {
-        labels: Array(12).fill(''),
-        datasets: [{
-          label: 'Memory Usage %',
-          data: Array(12).fill(0),
-          borderColor: '#4cc9f0',
-          backgroundColor: 'rgba(76, 201, 240, 0.1)',
-          borderWidth: 2,
-          tension: 0.4,
-          fill: true
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: {
-            beginAtZero: true,
-            max: 100
-          }
+      });
+    }
+  
+    if (!memoryChart) {
+      const memoryCtx = document.getElementById('memory-usage-graph').getContext('2d');
+      memoryChart = new Chart(memoryCtx, {
+        type: 'line',
+        data: {
+          labels: Array(12).fill(''),
+          datasets: [{
+            label: 'Memory Usage %',
+            data: Array(12).fill(0),
+            borderColor: '#4cc9f0',
+            backgroundColor: 'rgba(76, 201, 240, 0.1)',
+            borderWidth: 2,
+            tension: 0.4,
+            fill: true
+          }]
         },
-        plugins: {
-          legend: {
-            display: false
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100
+            }
+          },
+          plugins: {
+            legend: {
+              display: false
+            }
           }
         }
-      }
-    });
+      });
+    }
   }
 
+  window.addEventListener('resize', function() {
+    if (document.getElementById('system-logs').classList.contains('active')) {
+      if (cpuChart) cpuChart.resize();
+      if (memoryChart) memoryChart.resize();
+    }
+  });
   function updateSystemStats() {
     fetch(`${apiBaseUrl}/api/system-stats`)
       .then(response => response.json())
@@ -474,26 +487,31 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function switchTab(tabId) {
-      // Safely handle tab buttons
-      if (tabBtns && tabBtns.length > 0) {
-          tabBtns.forEach(btn => {
-              if (btn) btn.classList.remove('active');
-          });
-      }
+    // Deactivate all tabs
+    tabBtns.forEach(btn => btn.classList.remove('active'));
+    tabContents.forEach(content => content.classList.remove('active'));
+    
+    // Activate selected tab
+    const selectedBtn = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
+    const selectedContent = document.getElementById(tabId);
+    
+    if (selectedBtn) selectedBtn.classList.add('active');
+    if (selectedContent) selectedContent.classList.add('active');
   
-      // Safely handle tab contents
-      if (tabContents && tabContents.length > 0) {
-          tabContents.forEach(content => {
-              if (content) content.classList.remove('active');
-          });
+    // Handle charts specifically for system metrics tab
+    if (tabId === 'system-logs') {
+      initCharts();
+    } else {
+      // Destroy charts when not in metrics tab
+      if (cpuChart) {
+        cpuChart.destroy();
+        cpuChart = null;
       }
-  
-      // Activate the selected tab
-      const selectedBtn = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
-      const selectedContent = document.getElementById(tabId);
-      
-      if (selectedBtn) selectedBtn.classList.add('active');
-      if (selectedContent) selectedContent.classList.add('active');
+      if (memoryChart) {
+        memoryChart.destroy();
+        memoryChart = null;
+      }
+    }
   }
 
   function formatUptime(seconds) {
